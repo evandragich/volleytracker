@@ -76,8 +76,8 @@ get_set_data <- function(n, url) {
         opp_kill = if_else(str_detect(play_description, "Kill by") & !(uw_point), 1, 0),
         opp_atk_err = if_else(str_detect(play_description, "Attack error by") & uw_point, 1, 0),
         uw_atk_err = if_else(str_detect(play_description, "Attack error by") & !(uw_point), 1, 0),
-        uw_blk = if_else(str_detect(play_description, "Block by") & uw_point, 1, 0),
-        opp_blk = if_else(str_detect(play_description, "Block by") & !(uw_point), 1, 0),
+        uw_blk = if_else(str_detect(play_description, "block by") & uw_point, 1, 0),
+        opp_blk = if_else(str_detect(play_description, "block by") & !(uw_point), 1, 0),
         opp_blk_err = if_else(str_detect(play_description, "Block error") & uw_point, 1, 0),
         uw_blk_err = if_else(str_detect(play_description, "Block error") & !(uw_point), 1, 0),
         uw_srv_ace = if_else(str_detect(play_description, "Service ace") & uw_point, 1, 0),
@@ -89,25 +89,20 @@ get_set_data <- function(n, url) {
       mutate(across(c(uw_kill:uw_srv_err),
         cumsum,
         .names = "cum_{.col}"
-      ))
+      )) %>%
+      mutate(
+        kill_diff = cum_uw_kill - cum_opp_kill,
+        blk_diff = cum_uw_blk - cum_opp_blk,
+        blk_err_diff = cum_uw_blk_err - cum_opp_blk_err,
+        srv_ace_diff = cum_uw_srv_ace - cum_opp_srv_ace,
+        srv_err_diff = cum_uw_srv_err - cum_opp_srv_err
+      ) %>%
+      select(
+        c(point_diff, uw_so_pct, uw_ps_pct, kill_diff, blk_diff, blk_err_diff, srv_ace_diff, srv_err_diff, uw_score, opp_score)
+      )
   }
 }
 
-game_data <- map_dfr(c(1:5),
-  ~ get_set_data(
-    n = .x,
-    url = "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona-state/boxscore/19499"
-  ),
-  .id = "set"
-)
-
-game_data2 <- map_dfr(c(1:5),
-  ~ get_set_data(
-    n = .x,
-    url = "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona/boxscore/19493"
-  ),
-  .id = "set"
-)
 
 get_match_data <- function(url) {
   x <- map_dfr(c(1:5),
@@ -118,17 +113,21 @@ get_match_data <- function(url) {
                .id = "set"
   ) %>%
     group_by(set) %>%
-    mutate(uw_set_win = if_else(max(uw_score) > max(opp_score), 1, 0),
-           opp_set_win = if_else(max(uw_score) < max(opp_score), 1, 0)) %>%
-    group_by(set) %>%
-    mutate(across(c(uw_set_win, opp_set_win),
-                  cumsum,
-                  .names = "cum_{.col}"
-    ))
+    mutate(uw_set_win = if_else(max(uw_score) > max(opp_score), 1, 0)) %>%
+    rowwise() %>%
+    mutate(
+           pts_left = case_when( 
+             (uw_score <= 23 | opp_score <= 23) ~ (25 - min(uw_score, opp_score)),
+             abs(uw_score - opp_score) == 1     ~ 2,
+             uw_score == opp_score              ~ 1
+           )
+    )
   
   x
 }
   
-y <- get_match_data(url)
+urls <- list(
+  
+)
   
   
