@@ -2,6 +2,7 @@ library(tidyverse)
 library(glue)
 library(rvest)
 library(janitor)
+library(yardstick)
 
 # take 2
 # https://library.ndsu.edu/ir/bitstream/handle/10365/25890/Forecasting%20Point%20Spread%20for%20Women’s%20Volleyball.pdf?sequence=1&isAllowed=y
@@ -154,6 +155,28 @@ urls <- list(
   "https://gohuskies.com/sports/womens-volleyball/stats/2020/kentucky/boxscore/19858"
 )
 
+all_2020_data <- map_dfr(urls, get_match_data) %>%
+  na_omit()
 
+
+int_only_model <- glm(uw_set_win ~ 1, data = all_2020_data,
+                      family = "binomial")
+full_model <- glm(uw_set_win ~ point_diff + pts_left * (uw_so_pct + uw_ps_pct + kill_diff + blk_diff + blk_err_diff + srv_ace_diff + srv_err_diff),
+                  data = all_2020_data,
+                  family = "binomial")
+
+# gave me without blk_err_diff so i will remove and try again
+
+full_model <- glm(uw_set_win ~ point_diff + pts_left * (uw_so_pct + uw_ps_pct + kill_diff + blk_diff + srv_ace_diff + srv_err_diff),
+                  data = all_2020_data,
+                  family = "binomial")
+
+forward_select <- step(int_only_model, 
+                       scope = uw_set_win ~ (point_diff + pts_left) * (uw_so_pct + uw_ps_pct + kill_diff + blk_diff + blk_err_diff + srv_ace_diff + srv_err_diff), 
+                       direction = "forward")
+
+backward_select <- step(full_model, 
+                   scope = uw_set_win ~ (point_diff + pts_left) * (uw_so_pct + uw_ps_pct + kill_diff + blk_diff + blk_err_diff + srv_ace_diff + srv_err_diff), 
+                   direction = "backward")
   
   
