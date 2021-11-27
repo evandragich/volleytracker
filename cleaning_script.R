@@ -117,9 +117,10 @@ get_match_data <- function(url) {
     rowwise() %>%
     mutate(
            pts_left = case_when( 
-             (uw_score <= 23 | opp_score <= 23) ~ (25 - min(uw_score, opp_score)),
-             abs(uw_score - opp_score) == 1     ~ 2,
-             uw_score == opp_score              ~ 1
+             (!(set == 5) & (uw_score <= 23 | opp_score <= 23)) ~ (25 - max(uw_score, opp_score)),
+             set == 5 & (uw_score <= 13 | opp_score <= 13) ~ (15 - max(uw_score, opp_score)),
+             abs(uw_score - opp_score) == 1     ~ 1,
+             uw_score == opp_score              ~ 2
            )
     )
   
@@ -127,7 +128,32 @@ get_match_data <- function(url) {
 }
   
 urls <- list(
-  
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona-state/boxscore/19499",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona-state/boxscore/19500",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona/boxscore/19493",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/arizona/boxscore/19501",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/oregon-state/boxscore/19502",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/oregon-state/boxscore/19503",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/ucla/boxscore/19504",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/ucla/boxscore/19495",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/colorado/boxscore/19496",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/colorado/boxscore/19497",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/utah/boxscore/19505",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/utah/boxscore/19506",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/oregon/boxscore/19494",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/oregon/boxscore/19492",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/usc/boxscore/19507",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/usc/boxscore/19508",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/stanford/boxscore/19511",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/stanford/boxscore/19512",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/california/boxscore/19513",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/california/boxscore/19514",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/dayton/boxscore/19846",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/louisville/boxscore/19848",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/pittsburgh/boxscore/19854",
+  "https://gohuskies.com/sports/womens-volleyball/stats/2020/kentucky/boxscore/19858"
 )
+
+
   
   
